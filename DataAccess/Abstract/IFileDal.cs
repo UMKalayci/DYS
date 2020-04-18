@@ -8,6 +8,6 @@ namespace DataAccess.Abstract
 {
     public interface IFileDal : IEntityRepository<File>
     {
-
+        List<File> GetAllUserFiles(int userId);
     }
 }

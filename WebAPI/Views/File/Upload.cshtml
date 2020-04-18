@@ -57,25 +57,6 @@
     .m-t-20 {
         margin-top: 20px
     }
-
-    .btn-primary,
-    .sweet-alert button.confirm,
-    .wizard > .actions a {
-        background-color: #4099ff;
-        border-color: #4099ff;
-        color: #fff;
-        cursor: pointer;
-        -webkit-transition: all ease-in .3s;
-        transition: all ease-in .3s
-    }
-
-    .btn {
-        border-radius: 2px;
-        text-transform: capitalize;
-        font-size: 15px;
-        padding: 10px 19px;
-        cursor: pointer
-    }
 </style>
 
 <div class="row d-flex justify-content-center mt-100">
@@ -87,12 +68,12 @@
             <div class="card-block">
                 <form enctype="multipart/form-data" asp-action="Upload" method="post">
                     <div class="form-group">
-                        <input asp-for="FileName" class="form-control py-4 mb-2"   placeholder="Dosya İsmi">
-                        <input asp-for="FileDescription" class="form-control py-4"   placeholder="Kısa açıklama giriniz">
-                        <input asp-for="File" type="file" class="form-control-file  py-4" id="exampleFormControlFile1">
+                        <input asp-for="FileName" class="form-control py-4 mb-2" placeholder="Dosya İsmi">
+                        <input asp-for="FileDescription" class="form-control py-4" placeholder="Kısa açıklama giriniz">
+                        <input asp-for="File" type="file" class="form-control-file  p-4 mt-2 btn btn-primary" id="exampleFormControlFile1">
                     </div>
                     <div class="text-center m-t-20">
-                        <button type="submit" class="btn btn-primary" >Şimdi Yükle</button>
+                        <button type="submit" class="btn btn-primary">Şimdi Yükle</button>
                     </div>
                 </form>
             </div>

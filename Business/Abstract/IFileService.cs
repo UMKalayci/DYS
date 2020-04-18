@@ -11,5 +11,7 @@ namespace Business.Abstract
     {
         IResult UploadFileToBlob(FileForUploadDto fileDto, byte[] fileData, string accessKey);
         void DeleteBlobData(string fileUrl, string accessKey);
+
+        IDataResult<List<FileForListDto>> GetAllUserFiles(int userId);
     }
 }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Business.Abstract;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +13,23 @@ namespace WebAPI.Controllers
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     public class HomeController : Controller
     {
-        [Authorize]
+        private readonly IFileService _fileService;
+        public HomeController(IFileService fileService)
+        {
+            _fileService = fileService;
+        }
         public IActionResult Index()
         {
-            return View();
+            var userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var result= _fileService.GetAllUserFiles(userId);
+            if (result.Success)
+            {
+                return View(result.Data);
+            }
+            else
+            {
+                return View();
+            }
         }
     }
 }

@@ -9,6 +9,7 @@ namespace Entities.Dtos
     {
         public string FileName { get; set; }
         public string FileDescription { get; set; }
+        public int UserId { get; set; }
         public IFormFile File { get; set; }
     }
 }

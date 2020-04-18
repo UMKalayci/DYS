@@ -15,7 +15,7 @@ namespace WebAPI.Controllers
         private IAuthService _authService;
         private IUserService _userService;
 
-        public AccountController(IAuthService authService,IUserService userService)
+        public AccountController(IAuthService authService, IUserService userService)
         {
             _authService = authService;
             _userService = userService;
@@ -65,35 +65,36 @@ namespace WebAPI.Controllers
         [HttpPost]
         public IActionResult Register(UserForRegisterDto userRegister)
         {
+            if (ModelState.IsValid)
+            {
+                var userExists = _authService.UserExists(userRegister.Email);
+                if (!userExists.Success)
+                {
+                    ModelState.AddModelError("", "Kullanıcı zaten mevcut.");
+                    return View();
+                }
+                if (userRegister.Password != userRegister.ConfirmPassword)
+                {
+                    ModelState.AddModelError("", "Girilen şifreler uyuşmamaktadır.");
+                    return View();
+                }
 
-            var userExists = _authService.UserExists(userRegister.Email);
-            if (!userExists.Success)
-            {
-                ModelState.AddModelError("", "Kullanıcı zaten mevcut.");
-                return View();
-            }
-            if (userRegister.Password != userRegister.ConfirmPassword)
-            {
-                ModelState.AddModelError("", "Girilen şifreler uyuşmamaktadır.");
-                return View();
-            }
-
-            var registerResult = _authService.Register(userRegister);
-            if (registerResult.Success)
-            {
-                var userRoles = _userService.GetClaims(registerResult.Data);
-                var claims = new List<Claim>{
+                var registerResult = _authService.Register(userRegister);
+                if (registerResult.Success)
+                {
+                    var userRoles = _userService.GetClaims(registerResult.Data);
+                    var claims = new List<Claim>{
                     new Claim(ClaimTypes.NameIdentifier, registerResult.Data.Id.ToString()),
                     new Claim(ClaimTypes.Name,registerResult.Data.FirstName+" "+registerResult.Data.LastName),
                     };
 
-                var userIdentity = new ClaimsIdentity(claims, "login");
-                ClaimsPrincipal principal = new ClaimsPrincipal(new[] { userIdentity });
-                HttpContext.SignInAsync(principal);
-                return RedirectToAction("Index", "Home");
+                    var userIdentity = new ClaimsIdentity(claims, "login");
+                    ClaimsPrincipal principal = new ClaimsPrincipal(new[] { userIdentity });
+                    HttpContext.SignInAsync(principal);
+                    return RedirectToAction("Index", "Home");
 
+                }
             }
-
             ModelState.AddModelError("", "Kullanıcı oluşturulamadı.");
             return View();
         }

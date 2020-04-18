@@ -2,14 +2,19 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Business.Abstract;
 using Entities.Dtos;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
 namespace WebAPI.Controllers
 {
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     public class FileController : Controller
     {
         IFileService _fileService;
@@ -39,8 +44,12 @@ namespace WebAPI.Controllers
                     model.File.CopyTo(ms);
                     fileBytes = ms.ToArray();
                 }
-               _fileService.UploadFileToBlob(model, fileBytes, AzureConnectionString);
-
+                model.UserId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var result = _fileService.UploadFileToBlob(model, fileBytes, AzureConnectionString);
+                if (result.Success)
+                {
+                    return RedirectToAction("Upload");
+                }
             }
             return Ok();
         }
