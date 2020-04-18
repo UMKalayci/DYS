@@ -46,6 +46,8 @@
         <div class="card mb-4">
             <div class="card-header"><i class="fas fa-table mr-1"></i>Son Yüklenen Belgeler</div>
             <div class="card-body">
+                <div class="custom-control custom-checkbox">
+                <label  class="custom-control-label" >Sadece Kendi Belgelerim</label></div>
                 <div class="table-responsive">
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
@@ -60,18 +62,18 @@
                         <tbody>
                             @foreach (var item in Model)
                             {
-                            <tr>
-                                <td>@item.FileName</td>
-                                <td>@item.Desc</td>
-                                <td>@item.CreateUser</td>
-                                <td>@item.CreateDate.ToLongDateString()</td>
-                                <td>
-                                    <span class="table-remove">
-                                        <button type="button" class="btn btn-success btn-rounded btn-sm my-0">İndir</button>
-                                        <button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Sil</button>
-                                    </span>
-                                </td>
-                            </tr>
+                                <tr>
+                                    <td>@item.FileName</td>
+                                    <td>@item.Desc</td>
+                                    <td>@item.CreateUser</td>
+                                    <td>@item.CreateDate.ToLongDateString()</td>
+                                    <td>
+                                        <span class="table-remove">
+                                            <button type="button" class="btn btn-success btn-rounded btn-sm my-0">İndir</button>
+                                            <button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Sil</button>
+                                        </span>
+                                    </td>
+                                </tr>
                             }
                         </tbody>
                     </table>

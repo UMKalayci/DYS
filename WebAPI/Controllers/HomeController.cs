@@ -4,6 +4,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Business.Abstract;
+using Core.Utilities.Results;
+using Entities.Dtos;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,10 +20,11 @@ namespace WebAPI.Controllers
         {
             _fileService = fileService;
         }
-        public IActionResult Index()
+
+        public IActionResult Index(bool onlyUser)
         {
             var userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            var result= _fileService.GetAllUserFiles(userId);
+            var  result= _fileService.GetAllFiles(userId);
             if (result.Success)
             {
                 return View(result.Data);

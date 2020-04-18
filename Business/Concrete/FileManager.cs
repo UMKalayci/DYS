@@ -28,6 +28,7 @@ namespace Business.Concrete
                 string filePath = _task.Result;
                 File file = new File();
                 file.FileName = fileDto.FileName;
+                file.IsPrivate = fileDto.IsPrivate;
                 file.Description = fileDto.FileDescription;
                 file.FilePath = filePath;
                 file.CreateUser = fileDto.UserId;
@@ -122,6 +123,31 @@ namespace Business.Concrete
             catch
             {
                 return new  ErrorDataResult<List<FileForListDto>>(null,"Veriler listelenirken hata oluştu");
+            }
+        }
+        public IDataResult<List<FileForListDto>> GetAllFiles(int userId)
+        {
+            try
+            {
+                var files = _fileDal.GetAllFiles(userId);
+                List<FileForListDto> fileForListDtoList = new List<FileForListDto>();
+                foreach (var item in files)
+                {
+                    fileForListDtoList.Add(new FileForListDto()
+                    {
+                        Id = item.Id,
+                        FileName = item.FileName,
+                        FileType = item.FileType,
+                        Desc = item.Description,
+                        CreateDate = item.CreateDate,
+                        CreateUser = item.User.FirstName + " " + item.User.LastName
+                    });
+                }
+                return new SuccessDataResult<List<FileForListDto>>(fileForListDtoList);
+            }
+            catch
+            {
+                return new ErrorDataResult<List<FileForListDto>>(null, "Veriler listelenirken hata oluştu");
             }
         }
     }

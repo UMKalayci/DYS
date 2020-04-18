@@ -70,6 +70,7 @@
                     <div class="form-group">
                         <input asp-for="FileName" class="form-control py-4 mb-2" placeholder="Dosya İsmi">
                         <input asp-for="FileDescription" class="form-control py-4" placeholder="Kısa açıklama giriniz">
+                        <div class="custom-control custom-checkbox"><input asp-for="IsPrivate" class="custom-control-input" id="rememberPasswordCheck" type="checkbox" /><label asp-for="IsPrivate" class="custom-control-label" for="rememberPasswordCheck">Özel</label></div>
                         <input asp-for="File" type="file" class="form-control-file  p-4 mt-2 btn btn-primary" id="exampleFormControlFile1">
                     </div>
                     <div class="text-center m-t-20">

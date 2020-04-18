@@ -13,11 +13,19 @@ namespace DataAccess.Concrete.EntityFramework
 {
     public class EfFileDal : EfEntityRepositoryBase<File, FileManagerContext>, IFileDal
     {
+        public List<File> GetAllFiles(int userId)
+        {
+            using (var context = new FileManagerContext())
+            {
+                return context.Files.Where(x=>x.CreateUser==userId || x.IsPrivate==false).Include(x=>x.User).ToList();
+
+            }
+        }
         public List<File> GetAllUserFiles(int userId)
         {
             using (var context = new FileManagerContext())
             {
-                return context.Files.Where(x=>x.CreateUser==userId).Include(x=>x.User).ToList();
+                return context.Files.Where(x => x.CreateUser == userId).Include(x => x.User).ToList();
 
             }
         }

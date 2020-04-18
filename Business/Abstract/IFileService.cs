@@ -13,5 +13,6 @@ namespace Business.Abstract
         void DeleteBlobData(string fileUrl, string accessKey);
 
         IDataResult<List<FileForListDto>> GetAllUserFiles(int userId);
+        IDataResult<List<FileForListDto>> GetAllFiles(int userId);
     }
 }
