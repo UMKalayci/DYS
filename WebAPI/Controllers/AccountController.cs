@@ -1,12 +1,19 @@
 ﻿using Business.Abstract;
+using Business.Concrete;
+using Core.Entities.Concrete;
 using Entities.Dtos;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Web;
+using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
@@ -14,11 +21,13 @@ namespace WebAPI.Controllers
     {
         private IAuthService _authService;
         private IUserService _userService;
+        private UserManager<User> _userManager;
 
-        public AccountController(IAuthService authService, IUserService userService)
+        public AccountController(IAuthService authService, IUserService userService, UserManager<User> userManager)
         {
             _authService = authService;
             _userService = userService;
+            _userManager = userManager;
         }
 
         public IActionResult Login()
@@ -96,6 +105,68 @@ namespace WebAPI.Controllers
                 }
             }
             ModelState.AddModelError("", "Kullanıcı oluşturulamadı.");
+            return View();
+        }
+
+        public IActionResult PasswordRecovery()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> PasswordRecovery(ResetPasswordModel resetPasswordModel)
+        {
+            var user = _userService.GetByMail(resetPasswordModel.Email);
+            if (user != null)
+            {
+                var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+                var fromAddress = new MailAddress("bmugurmutlukalayci@gmail.com", "Uğur Mutlu KALAYCI");
+                var toAddress = new MailAddress(user.Email, "Dursun KALAYCI");
+                const string fromPassword = "****";
+                const string subject = "Şifre Güncelleme Talebi";
+                string body = $"<a target=\"_blank\" href=\"https://localhost:44335{Url.Action("UpdatePassword", "User", new { UserEmail = user.Email, Token = HttpUtility.UrlEncode(resetToken) })}\">Yeni şifre talebi için tıklayınız</a>";
+
+                var smtp = new SmtpClient
+                {
+                    Host = "smtp.gmail.com",
+                    Port = 587,
+                    EnableSsl = true,
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = true,
+                    Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+                };
+                using (var message = new MailMessage(fromAddress, toAddress)
+                {
+                    Subject = subject,
+                    Body = body
+                })
+                {
+                    smtp.Send(message);
+                }
+                ViewBag.State = true;
+            }
+            else
+                ViewBag.State = false;
+
+            return View();
+        }
+
+        public IActionResult UpdatePassword()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> UpdatePassword(UpdatePasswordModel updatePasswordModel)
+        {
+            var user = _userService.GetByMail(updatePasswordModel.UserEMail);
+            IdentityResult result = await _userManager.ResetPasswordAsync(user, HttpUtility.UrlDecode(updatePasswordModel.Token), updatePasswordModel.Password);
+            if (result.Succeeded)
+            {
+                ViewBag.State = true;
+                await _userManager.UpdateSecurityStampAsync(user);
+            }
+            else
+                ViewBag.State = false;
             return View();
         }
         [HttpPost]
