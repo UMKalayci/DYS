@@ -10,7 +10,7 @@ namespace WebAPI.Models
     {
         [Required]
         [EmailAddress]
-        public string UserEMail { get; set; }
+        public string UserEmail { get; set; }
         [Required]
         public string Password { get; set; }
         [Required]

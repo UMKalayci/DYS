@@ -21,13 +21,11 @@ namespace WebAPI.Controllers
     {
         private IAuthService _authService;
         private IUserService _userService;
-        private UserManager<User> _userManager;
 
-        public AccountController(IAuthService authService, IUserService userService, UserManager<User> userManager)
+        public AccountController(IAuthService authService, IUserService userService)
         {
             _authService = authService;
             _userService = userService;
-            _userManager = userManager;
         }
 
         public IActionResult Login()
@@ -113,18 +111,18 @@ namespace WebAPI.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> PasswordRecovery(ResetPasswordModel resetPasswordModel)
+        public IActionResult PasswordRecovery(ResetPasswordModel resetPasswordModel)
         {
             var user = _userService.GetByMail(resetPasswordModel.Email);
             if (user != null)
             {
-                var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var resetToken = _authService.CreateAccessToken(user);
 
                 var fromAddress = new MailAddress("bmugurmutlukalayci@gmail.com", "Uğur Mutlu KALAYCI");
                 var toAddress = new MailAddress(user.Email, "Dursun KALAYCI");
-                const string fromPassword = "****";
+                const string fromPassword ="++";
                 const string subject = "Şifre Güncelleme Talebi";
-                string body = $"<a target=\"_blank\" href=\"https://localhost:44335{Url.Action("UpdatePassword", "User", new { UserEmail = user.Email, Token = HttpUtility.UrlEncode(resetToken) })}\">Yeni şifre talebi için tıklayınız</a>";
+                string body = $"<a target=\"_blank\" href=\"https://localhost:44335{Url.Action("UpdatePassword", "Account", new { UserEmail = user.Email, Token = HttpUtility.UrlEncode(resetToken.Data.Token) })}\">Yeni şifre talebi için tıklayınız</a>";
 
                 var smtp = new SmtpClient
                 {
@@ -151,23 +149,35 @@ namespace WebAPI.Controllers
             return View();
         }
 
-        public IActionResult UpdatePassword()
+        public IActionResult UpdatePassword(string UserEmail, string Token)
         {
-            return View();
+            var updatePasswordModel = new UpdatePasswordModel();
+            updatePasswordModel.UserEmail = UserEmail;
+            updatePasswordModel.Token = Token;
+            return View(updatePasswordModel);
         }
         [HttpPost]
-        public async Task<IActionResult> UpdatePassword(UpdatePasswordModel updatePasswordModel)
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdatePassword(UpdatePasswordModel updatePasswordModel)
         {
-            var user = _userService.GetByMail(updatePasswordModel.UserEMail);
-            IdentityResult result = await _userManager.ResetPasswordAsync(user, HttpUtility.UrlDecode(updatePasswordModel.Token), updatePasswordModel.Password);
-            if (result.Succeeded)
+            if (!ModelState.IsValid)
+                return View(updatePasswordModel);
+
+            var user = _userService.GetByMail(updatePasswordModel.UserEmail);
+            if (user == null)
+                return RedirectToAction(nameof(ResetPasswordConfirmation));
+            var result =  _authService.ResetPasswordAsync(user, HttpUtility.UrlDecode(updatePasswordModel.Token), updatePasswordModel.Password);
+            if (!result.Success)
             {
-                ViewBag.State = true;
-                await _userManager.UpdateSecurityStampAsync(user);
+                return View();
             }
-            else
-                ViewBag.State = false;
-            return View();
+           return RedirectToAction(nameof(ResetPasswordConfirmation));
+
+        }
+
+        public IActionResult ResetPasswordConfirmation(bool IsSuccess)
+        {
+            return View(IsSuccess);
         }
         [HttpPost]
         public async Task<IActionResult> Logout()

@@ -71,5 +71,22 @@ namespace Business.Concrete
             return new SuccessDataResult<AccessToken>(accessToken,Messages.AccessTokenCreated);
         }
 
+        public IResult ResetPasswordAsync(User user, string token, string password)
+        {
+           if(_tokenHelper.TokenControl(token,user))
+            {
+                byte[] passwordHash, passwordSalt;
+                HashingHelper.CreatePasswordHash(password, out passwordHash, out passwordSalt);
+                user.PasswordHash = passwordHash;
+                user.PasswordSalt = passwordSalt;
+                _userService.Update(user);
+                return new SuccessResult();
+            }
+            else
+            {
+                return new ErrorResult();
+            }
+        }
+
     }
 }

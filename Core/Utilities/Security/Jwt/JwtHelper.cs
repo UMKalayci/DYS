@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using Core.Entities.Concrete;
 using Core.Extensions;
+using Core.Utilities.Results;
 using Core.Utilities.Security.Encyption;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -29,6 +30,7 @@ namespace Core.Utilities.Security.Jwt
             var signingCredentials = SigningCredentialsHelper.CreateSigningCredentials(securityKey);
             var jwt = CreateJwtSecurityToken(_tokenOptions, user, signingCredentials, operationClaims);
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            
             var token = jwtSecurityTokenHandler.WriteToken(jwt);
 
             return new AccessToken
@@ -36,6 +38,19 @@ namespace Core.Utilities.Security.Jwt
                 Token = token,
                 Expiration = _accessTokenExpiration
             };
+
+        }
+        public bool TokenControl(string token,User user)
+        {
+            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+
+            var tokenS = jwtSecurityTokenHandler.ReadToken(token) as JwtSecurityToken;
+
+            if (user.UpdateDate != null && tokenS.ValidFrom.AddHours(3) < user.UpdateDate)
+                return false;
+
+            return tokenS.Claims.Where(x => x.Type == "email").First().Value == user.Email;
+
 
         }
 
@@ -52,6 +67,7 @@ namespace Core.Utilities.Security.Jwt
             );
             return jwt;
         }
+
 
         private IEnumerable<Claim> SetClaims(User user, List<OperationClaim> operationClaims)
         {
