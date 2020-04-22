@@ -14,5 +14,6 @@ namespace Business.Abstract
 
         IDataResult<List<FileForListDto>> GetAllUserFiles(int userId);
         IDataResult<List<FileForListDto>> GetAllFiles(int userId);
+        IDataResult<bool> IsUserFileAccess(int userId, int fileId);
     }
 }

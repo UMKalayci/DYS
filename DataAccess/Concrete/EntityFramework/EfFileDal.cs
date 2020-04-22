@@ -29,5 +29,13 @@ namespace DataAccess.Concrete.EntityFramework
 
             }
         }
+        public bool IsUserFileAccess(int userId,int fileId)
+        {
+            using (var context = new FileManagerContext())
+            {
+                return context.Files.Any(x => x.CreateUser == userId && x.Id == fileId);
+
+            }
+        }
     }
 }

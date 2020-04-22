@@ -10,5 +10,6 @@ namespace DataAccess.Abstract
     {
         List<File> GetAllFiles(int userId);
         List<File> GetAllUserFiles(int userId);
+        bool IsUserFileAccess(int userId, int fileId);
     }
 }
